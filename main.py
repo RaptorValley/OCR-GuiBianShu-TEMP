@@ -1,5 +1,6 @@
 import os
 import openai
+import requests
 
 
 def get_image_files(directory):
@@ -28,9 +29,10 @@ def call_openai_ocr(index, api_key):
                     "type": "image_url",
                     "image_url": {
                         "url": image_url,
-                        "detail": "auto",
+                        "detail": "high",
                     },
-                }
+                },
+                {"type": "text", "text": "描述这张图片的内容"},
             ],
         }
     ]
@@ -61,4 +63,41 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    url = "https://api.siliconflow.cn/v1/chat/completions"
+
+    payload = {
+        "model": "deepseek-ai/DeepSeek-OCR",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": "https://raw.githubusercontent.com/RaptorValley/OCR-GuiBianShu-TEMP/main/pages_002.jpg",
+                            "detail": "high",
+                        },
+                    },
+                    {"type": "text", "text": "描述这张图片的内容"},
+                ],
+            }
+        ],
+        "stream": False,
+        "max_tokens": 4096,
+        "min_p": 0.05,
+        "stop": [],
+        "temperature": 0.2,
+        "top_p": 0.7,
+        "top_k": 50,
+        "frequency_penalty": 0.5,
+        "n": 1,
+        "response_format": {"type": "text"},
+    }
+    headers = {
+        "Authorization": "Bearer sk-qqihqjrfuqkoxxxqmvcxddazqfroocdhmjptkazjgetbvqcf",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    print(response.json())
